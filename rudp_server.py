@@ -23,7 +23,7 @@ Tips:
 import random, socket, struct, sys, threading
 
 # ===================== CONFIG (EDIT YOUR PORT) =====================
-ASSIGNED_PORT = 30077  # <-- REPLACE with your assigned UDP port (from Canvas)
+ASSIGNED_PORT = 30009  # <-- REPLACE with your assigned UDP port (from Canvas)
 # ==================================================================
 
 # --- Flag bits (1 byte) ---
