@@ -20,7 +20,7 @@ import random, socket, struct, sys, time
 
 # ===================== CONFIG (EDIT HOST/PORT) =====================
 SERVER_HOST = '127.0.0.1'      # server IP or hostname
-ASSIGNED_PORT = 30077   # <-- REPLACE with your assigned UDP port (from Canvas)
+ASSIGNED_PORT = 30009   # <-- REPLACE with your assigned UDP port (from Canvas)
 SERVER = (SERVER_HOST, ASSIGNED_PORT)
 # ==================================================================
 
