@@ -120,7 +120,7 @@ def main():
     for event in events:
       
       payload=event.encode()
-      msg = pack_msg(curr_seq, 0, DATA, line)
+      msg = pack_msg(curr_seq, 0, 0, line)
       is_expected = lambda s, a, fl, p: (fl & ACK) and (a == seq_add(curr_seq, len(payload)))
       reply = send_recv_with_retry(cli, msg, is_expected)
       
