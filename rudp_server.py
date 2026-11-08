@@ -137,7 +137,7 @@ def main():
       if msg is None:
         continue
       seq, ack, flags, pl = msg
-      if flags == ACK and ack == seq_add(server_isn, 1):
+      if (flags & ACK) and ack == seq_add(server_isn, 1):    #uses bitwise & to check to specifically check bit corresponding to ACK, catches ack and hanging syn|ack
         break
 
     state = 'ESTABLISHED'
