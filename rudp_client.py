@@ -98,7 +98,7 @@ def main():
 
     packet=pack_msg(x, 0, SYN, b'')
 
-    is_expected = lambda seq, ack, flags, pl: (fl == (SYN | ACK)) and (a == seq_add(x, 1))
+    is_expected = lambda s, a, fl, p: (fl == (SYN | ACK)) and (a == seq_add(x, 1))
 
     
     reply = send_recv_with_retry(cli, packet, is_expected)
@@ -121,7 +121,7 @@ def main():
       
       payload=event.encode()
       msg = pack_msg(curr_seq, 0, DATA, line)
-      is_expected = lambda seq, ack, flags, pl: (fl & ACK) and (a == seq_add(curr_seq, len(payload)))
+      is_expected = lambda s, a, fl, p: (fl & ACK) and (a == seq_add(curr_seq, len(payload)))
       reply = send_recv_with_retry(cli, msg, is_expected)
       
       if reply is None:
@@ -134,7 +134,7 @@ def main():
 
     #teardown
     fin_pkt = pack_msg(curr_seq, 0, FIN, b'')
-    is_expected = lambda seq, ack, flags, pl: ((fl & FIN) and (fl & ACK)) and (a == seq_add(curr_seq, 1))
+    is_expected = lambda s, a, fl, p: ((fl & FIN) and (fl & ACK)) and (a == seq_add(curr_seq, 1))
 
     reply = send_recv_with_retry(cli, fin_pkt, is_expected)
 
