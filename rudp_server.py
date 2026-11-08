@@ -120,6 +120,36 @@ def main():
         if msg is None:
             continue
         seq, ack, flags, pl = msg
+        if flags == SYN:
+          client_isn = seq #x
+          client_addr = addr
+          break
+
+    server_isn = random.randint(0, SEQ_MOD - 1) #y
+    state = 'SYN_RCVD'
+
+    syn_ack_pkt = pack_msg(server_isn, seq_add(client_isn, 1), SYN | ACK)
+    sock.sendto(syn_ack_pkt, client_addr)
+
+    while True:
+      pkt, addr = sock.recvfrom(2048)
+      msg = unpack_msg(pkt)
+      if msg is None:
+        continue
+      seq, ack, flags, pl = msg
+      if flags == ACK and ack == seq_add(server_isn, 1):
+        break
+
+    state = 'ESTABLISHED'
+    expect_seq = seq_add(client_isn, 1)
+    board = Scoreboard()
+    print('[SERVER] Connection established')
+      
+
+      
+
+
+  
 
         # ============ PHASE 1: HANDSHAKE (YOU IMPLEMENT) ============
         # TODO:
