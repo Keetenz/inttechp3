@@ -129,7 +129,7 @@ def main():
     state = 'SYN_RCVD'
 
     syn_ack_pkt = pack_msg(server_isn, seq_add(client_isn, 1), SYN | ACK)
-    sock.sendto(syn_ack_pkt, client_addr)
+    send_unreliable(sock, syn_ack_pkt, client_addr)
 
     while True:
       pkt, addr = sock.recvfrom(2048)
@@ -142,7 +142,7 @@ def main():
       seq, ack, flags, pl = msg
       
       if flags == SYN:      #duplicate SYN, syn-ack was lost or delayed so we retransmit
-        sock.sendto(syn_ack_pkt, client_addr)
+        send_unreliable(sock, syn_ack_pkt, client_addr)
       
       elif (flags & ACK) and ack == seq_add(server_isn, 1) and seq == seq_add(client_isn, 1):    #uses bitwise & to check to specifically check bit corresponding to ACK, catches ack and hanging syn|ack
         break
@@ -153,12 +153,48 @@ def main():
     print('[SERVER] Connection established')
 
     if pl:      #Ensures first packet is still captured even if first ACK was lost
-      board.update(pl)
+      board.apply(pl.decode())
       expect_seq = seq_add(expect_seq, len(pl))
+
+    while True:
+      pkt, addr = sock.recvfrom(2048)
+      msg = unpack_msg(pkt)
+      if msg is None:
+        continue
+      if addr != client_addr:    #ignores packets from the wrong clients
+        continue
+        
+      seq, ack, flags, pl = msg
+
+      if (flags & DATA) and len(pl) > 0:
+        if seq == expect_seq:
+          board.apply(pl.decode())
+          expect_seq = seq_add(expect_seq, len(pl))
+        else:
+          print("[SERVER] Duplicate or out-of-order packet received")
+          
+        ack_pkt = pack_msg(seq_add(server_isn, 1), expect_seq, ACK)
+        send_unreliable(sock, ack_pkt, client_addr)
+
+
       
+      #teardown
+      elif (flags & FIN) and seq == expect_seq:
+        fin_ack_pkt = pack_msg(seq_add(server_isn, 1), seq_add(seq, 1), FIN | ACK)
+        send_unreliable(sock, fin_ack_pkt, client_addr)
+        board.save()
+        print('[SERVER] Connection closed')
+        
+        last_close = (client_addr, fin_ack_pkt)  #saves last_close if client sends duplicate fin
+        break
+  
+
+
+        
 
       
 
+    
 
   
 
