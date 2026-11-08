@@ -166,7 +166,7 @@ def main():
         
       seq, ack, flags, pl = msg
 
-      if (flags & DATA) and len(pl) > 0:
+      if len(p1) > 0:
         if seq == expect_seq:
           board.apply(pl.decode())
           expect_seq = seq_add(expect_seq, len(pl))
