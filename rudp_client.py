@@ -114,6 +114,28 @@ def main():
     cli.sendto(final_ack_pkt, (SERVER_HOST, ASSIGNED_PORT))
 
     print('[CLIENT] Connection established')
+
+    curr_seq = seq_add(x, 1)
+  
+    for event in events:
+      
+      payload=event.encode()
+      msg = pack_msg(curr_seq, 0, DATA, line)
+      is_expected = lambda s, a, fl, p: (fl & ACK) and (a == seq_add(curr_seq, len(payload)))
+      reply = send_recv_with_retry(cli, msg, is_expected)
+      
+      if reply is None:
+        print('[CLIENT] Failed to receive response')
+        sys.exit(1)
+      y = reply[1]
+      if y == seq_add(curr_seq, len(payload)):
+        print(f"[CLIENT] Received ACK: {y}")
+        curr_seq = seq_add(curr_seq, len(payload))
+      
+
+    
+
+  
     
   
     # ============ PHASE 1: HANDSHAKE (YOU IMPLEMENT) ==============
