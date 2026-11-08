@@ -26,7 +26,7 @@ SERVER = (SERVER_HOST, ASSIGNED_PORT)
 
 # Timing/reliability parameters
 RTO = 0.5          # retransmission timeout (seconds)
-RETRIES = 5        # max tries per packet
+RETRIES = 5        # max tries per 
 
 # --- Flag bits (1 byte) ---
 SYN, ACK, FIN = 0x01, 0x02, 0x04
@@ -93,6 +93,29 @@ def main():
 
     cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+    x = random.randint(0, SEQ_MOD - 1)
+    print(f"[CLIENT] Initial SEQ: {x}")
+
+    packet=pack_msg(x, 0, SYN, b'')
+
+    is_expected = lambda s, a, fl, p: (fl == (SYN | ACK)) and (a == seq_add(x, 1))
+
+    
+    reply = send_recv_with_retry(cli, packet, is_expected)
+
+    if reply is None:
+      print("[CLIENT] Connection failed: no SYN-ACK received")
+      sys.exit(1)
+
+    y = reply[0]
+    print(f"[CLIENT] Received SYN-ACK with SEQ: {y}")
+
+    final_ack_pkt = pack_msg(seq_add(x, 1), seq_add(y, 1), ACK)
+    cli.sendto(final_ack_pkt, (SERVER_HOST, ASSIGNED_PORT))
+
+    print('[CLIENT] Connection established')
+    
+  
     # ============ PHASE 1: HANDSHAKE (YOU IMPLEMENT) ==============
     # TODO:
     #   - pick x = random.randint(0, SEQ_MOD - 1) and print it
