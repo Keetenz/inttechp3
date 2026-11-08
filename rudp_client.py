@@ -20,13 +20,13 @@ import random, socket, struct, sys, time
 
 # ===================== CONFIG (EDIT HOST/PORT) =====================
 SERVER_HOST = '127.0.0.1'      # server IP or hostname
-ASSIGNED_PORT = 30009   # <-- REPLACE with your assigned UDP port (from Canvas)
+ASSIGNED_PORT = 30077   # <-- REPLACE with your assigned UDP port (from Canvas)
 SERVER = (SERVER_HOST, ASSIGNED_PORT)
 # ==================================================================
 
 # Timing/reliability parameters
 RTO = 0.5          # retransmission timeout (seconds)
-RETRIES = 5        # max tries per 
+RETRIES = 5        # max tries per packet
 
 # --- Flag bits (1 byte) ---
 SYN, ACK, FIN = 0x01, 0x02, 0x04
@@ -91,7 +91,7 @@ def main():
     with open(feed_path) as f:
         events = [line.rstrip('\n') for line in f if line.strip()]
 
-    cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     x = random.randint(0, SEQ_MOD - 1)
     print(f"[CLIENT] Initial SEQ: {x}")
@@ -120,16 +120,16 @@ def main():
     for event in events:
       
       payload=event.encode()
-      msg = pack_msg(curr_seq, 0, 0, line)
+      msg = pack_msg(curr_seq, seq_add(y, 1), ACK, payload)
       is_expected = lambda s, a, fl, p: (fl & ACK) and (a == seq_add(curr_seq, len(payload)))
       reply = send_recv_with_retry(cli, msg, is_expected)
       
       if reply is None:
         print('[CLIENT] Failed to receive response')
         sys.exit(1)
-      y = reply[1]
-      if y == seq_add(curr_seq, len(payload)):
-        print(f"[CLIENT] Received ACK: {y}")
+      server_ack = reply[1]
+      if server_ack == seq_add(curr_seq, len(payload)):
+        print(f"[CLIENT] Received ACK: {server_ack}")
         curr_seq = seq_add(curr_seq, len(payload))
 
     #teardown
@@ -143,8 +143,10 @@ def main():
         sys.exit(1)
       
     print("[CLIENT] Connection closed")
+
+
+
     cli.close()
-      
 
 if __name__ == '__main__':
     main()
