@@ -131,47 +131,20 @@ def main():
       if y == seq_add(curr_seq, len(payload)):
         print(f"[CLIENT] Received ACK: {y}")
         curr_seq = seq_add(curr_seq, len(payload))
+
+    #teardown
+    fin_pkt = pack_msg(curr_seq, 0, FIN, b'')
+    is_expected = lambda s, a, fl, p: ((fl & FIN) and (fl & ACK)) and (a == seq_add(curr_seq, 1))
+
+    reply = send_recv_with_retry(cli, fin_pkt, is_expected)
+
+    if reply is None:
+        print("[CLIENT] Teardown failed: no FIN-ACK received")
+        sys.exit(1)
       
-
-    
-
-  
-    
-  
-    # ============ PHASE 1: HANDSHAKE (YOU IMPLEMENT) ==============
-    # TODO:
-    #   - pick x = random.randint(0, SEQ_MOD - 1) and print it
-    #   - send SYN: seq = x, ack = 0, flags = SYN
-    #   - wait (with retry) for a SYN-ACK whose ack == x + 1
-    #   - on success: y = the SYN-ACK's seq; print it
-    #   - send the final ACK: seq = x + 1, ack = y + 1, flags = ACK (log it!)
-    #   - print('[CLIENT] Connection established')
-    #   - if no valid SYN-ACK after RETRIES tries: print a message and exit
-    # HINT: send_recv_with_retry() takes a function that decides whether a reply is the
-    #       one you are waiting for, e.g.  lambda s, a, fl, p: fl == SYN | ACK and a == seq_add(x, 1)
-    pass  # <-- replace with your handshake code
-    # ===============================================================
-
-    # ============ PHASE 2: DATA SEND LOOP (YOU IMPLEMENT) =========
-    # TODO:
-    #   - the first DATA seq is x + 1; every DATA carries ack = y + 1 and flags = ACK
-    #   - for each event in events:
-    #       * payload = event.encode()
-    #       * send DATA and wait (with retry) for an ACK with ack == seq + len(payload)
-    #       * on success: seq = seq + len(payload)
-    #       * on failure: print a message and exit
-    pass  # <-- replace with your data send loop
-    # ===============================================================
-
-    # ============ PHASE 3: TEARDOWN (YOU IMPLEMENT) ===============
-    # TODO:
-    #   - send FIN: seq = your current seq, ack = y + 1, flags = FIN
-    #   - wait (with retry) for a FIN-ACK whose ack == your seq + 1
-    #   - on success print('[CLIENT] Connection closed')
-    pass  # <-- replace with your teardown code
-    # ===============================================================
-
+    print("[CLIENT] Connection closed")
     cli.close()
+      
 
 if __name__ == '__main__':
     main()
