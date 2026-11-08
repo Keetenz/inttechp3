@@ -23,7 +23,7 @@ Tips:
 import random, socket, struct, sys, threading
 
 # ===================== CONFIG (EDIT YOUR PORT) =====================
-ASSIGNED_PORT = 30009  # <-- REPLACE with your assigned UDP port (from Canvas)
+ASSIGNED_PORT = 30077  # <-- REPLACE with your assigned UDP port (from Canvas)
 # ==================================================================
 
 # --- Flag bits (1 byte) ---
@@ -166,7 +166,7 @@ def main():
         
       seq, ack, flags, pl = msg
 
-      if len(p1) > 0:
+      if len(pl) > 0:
         if seq == expect_seq:
           board.apply(pl.decode())
           expect_seq = seq_add(expect_seq, len(pl))
@@ -187,7 +187,7 @@ def main():
         
         last_close = (client_addr, fin_ack_pkt)  #saves last_close if client sends duplicate fin
         break
-  
+
 
 if __name__ == '__main__':
     main()
