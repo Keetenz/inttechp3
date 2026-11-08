@@ -189,55 +189,5 @@ def main():
         break
   
 
-
-        
-
-      
-
-    
-
-  
-
-        # ============ PHASE 1: HANDSHAKE (YOU IMPLEMENT) ============
-        # TODO:
-        #  - If this is a SYN (flags == SYN) and state == 'LISTEN':
-        #       * remember client_addr = addr and client_isn = seq
-        #       * pick server_isn = random.randint(0, SEQ_MOD - 1)
-        #       * state = 'SYN_RCVD'
-        #       * send SYN-ACK: seq = server_isn, ack = client_isn + 1, flags = SYN | ACK
-        #  - If it is a DUPLICATE SYN from the same client (your SYN-ACK was lost or delayed):
-        #       * resend the SAME SYN-ACK (same server_isn, do not pick a new one)
-        #  - If state == 'SYN_RCVD' and this packet has the ACK flag,
-        #    ack == server_isn + 1 and seq == client_isn + 1:
-        #       * state = 'ESTABLISHED'; expect_seq = client_isn + 1; board = Scoreboard()
-        #       * print('[SERVER] Connection established')
-        #  - Ignore packets from any other address
-        # HINT: use seq_add() for every "+ 1" so numbers wrap at 2^32 like TCP.
-        # HINT: if the client's final ACK is lost, its first DATA packet also carries
-        #       the ACK flag and ack = y + 1. Treat that as completing the handshake too.
-        pass  # <-- replace with your handshake logic
-        # ============================================================
-
-        # ============ PHASE 2: DATA (YOU IMPLEMENT) =================
-        # TODO (only when state == 'ESTABLISHED' and the packet carries a payload):
-        #   - If seq == expect_seq:
-        #       * deliver it: board.apply(pl.decode())
-        #       * expect_seq = seq + len(pl)
-        #   - Else (duplicate or out of order):
-        #       * do NOT deliver it; print that it was a duplicate
-        #   - Either way, reply: seq = server_isn + 1, ack = expect_seq, flags = ACK
-        pass  # <-- replace with your data logic
-        # ============================================================
-
-        # ============ PHASE 3: TEARDOWN (YOU IMPLEMENT) =============
-        # TODO (when a FIN arrives with seq == expect_seq):
-        #   - send FIN-ACK: seq = server_isn + 1, ack = FIN's seq + 1, flags = FIN | ACK
-        #   - print('[SERVER] Connection closed') and call board.save()
-        #   - remember last_close = (client_addr, that FIN-ACK packet)
-        #   - reset state: state='LISTEN'; client_addr=None; client_isn=None; server_isn=None; expect_seq=None
-        #   - if a FIN arrives later from last_close's address, resend last_close's FIN-ACK
-        pass  # <-- replace with your teardown logic
-        # ============================================================
-
 if __name__ == '__main__':
     main()
